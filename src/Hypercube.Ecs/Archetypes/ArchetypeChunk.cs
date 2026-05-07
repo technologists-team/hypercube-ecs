@@ -38,14 +38,17 @@ public sealed class ArchetypeChunk
         return index;
     }
     
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public void RemoveEntity(int index, Entity entity)
+    public int RemoveEntity(int index)
     {
         var lastIndex = --Count;
-        if (index == lastIndex)
-            return;
 
-        _entities[index] = _entities[lastIndex];
+        if (index == lastIndex)
+            return -1;
+
+        var movedEntity = _entities[lastIndex];
+        _entities[index] = movedEntity;
+
+        return movedEntity;
     }
     
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

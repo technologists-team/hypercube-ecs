@@ -43,7 +43,7 @@ public partial class World
             {
                 var archetype = _archetypes[location.ArchetypeIndex];
                 var chunk = archetype.Chunks[location.ChunkIndex];
-                archetype.RemoveEntity(chunk, location.LocalIndex, entity);
+                archetype.RemoveEntity(chunk, location.LocalIndex);
             }
         }
         

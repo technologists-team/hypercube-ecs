@@ -54,24 +54,6 @@ public partial class World
         
         _archetypes[_archetypeCount++] = archetype;
         _archetypesHashCode = -1;
-        
-        // Empty archetype is always at index 0
-        if (signature == Signature.Empty)
-            return archetype;
-        
-        // Move empty archetype to front if needed
-        if (_archetypeCount <= 1 || _archetypes[0] == _emptyArchetype)
-            return archetype;
-        
-        // Swap
-        for (var i = 0; i < _archetypeCount; i++)
-        {
-            if (_archetypes[i] != _emptyArchetype)
-                continue;
-            
-            (_archetypes[0], _archetypes[i]) = (_archetypes[i], _archetypes[0]);
-            break;
-        }
 
         return archetype;
     }
@@ -98,7 +80,13 @@ public partial class World
         
         // Remove from old archetype
         var oldChunk = fromArchetype.Chunks[oldLocation.ChunkIndex];
-        fromArchetype.RemoveEntity(oldChunk, oldLocation.LocalIndex, entity);
+        
+        var movedEntityId = fromArchetype.RemoveEntity(oldChunk, oldLocation.LocalIndex);
+        if (movedEntityId != -1)
+        {
+            ref var movedLocation = ref _entityLocations[movedEntityId];
+            movedLocation = new EntityLocation(oldLocation.ArchetypeIndex, oldLocation.ChunkIndex, oldLocation.LocalIndex);
+        }
         
         // Add to new archetype
         var (newChunk, newLocalIndex) = toArchetype.AddEntity(entity);
@@ -131,7 +119,11 @@ public partial class World
         if (entityId < _entityLocations.Length)
             return;
 
-        Array.Resize(ref _entityLocations, _entityLocations.Length * 2);
+        var newSize = _entityLocations.Length;
+        while (entityId >= newSize)
+            newSize *= 2;
+
+        Array.Resize(ref _entityLocations, newSize);
     }
     
     private int GetArchetypesHashCode()
@@ -140,9 +132,9 @@ public partial class World
             return _archetypesHashCode;
         
         var hash = 17;
-        foreach (var item in _archetypes)
+        for (var i = 0; i < _archetypeCount; i++)
         {
-            hash = hash * 31 + (item?.GetHashCode() ?? 0);
+            hash = hash * 31 + _archetypes[i].GetHashCode();
         }
         
         _logger.Trace($"New archetypes hash code: {hash}");
