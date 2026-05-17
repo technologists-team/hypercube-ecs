@@ -4,7 +4,7 @@ using Hypercube.Ecs.Queries;
 
 namespace Hypercube.Ecs;
 
-public interface IWorld
+public partial interface IWorld
 {
     IEventBus Events { get; }
     
