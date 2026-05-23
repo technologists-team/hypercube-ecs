@@ -31,13 +31,14 @@ public readonly struct Signature : IEquatable<Signature>
     public Signature(params ComponentMeta[] components)
     {
         _components = components;
-        _hashCode = GetHashCode(_components);
-   
+        
         foreach (ref var component in components.AsSpan())
         {
             if (component.Id > _maxId)
                 _maxId = component.Id;
         }
+        
+        _hashCode = GetHashCode(_components);
     }
 
     public Signature(Span<ComponentMeta> components) : this(components.ToArray())
